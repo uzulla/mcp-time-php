@@ -1,178 +1,33 @@
 <?php
+declare(strict_types=1);
+
 /**
  * MCP タイムサーバー - PHP版
  * MCPに時刻とタイムゾーン変換機能を提供します
  */
 
-/**
- * TimeTools 列挙型クラス相当
- */
-class TimeTools {
-    const GET_CURRENT_TIME = "get_current_time";
-    const CONVERT_TIME = "convert_time";
-}
+namespace Uzulla\MCP\Time;
+
+use Exception;
+use Uzulla\MCP\Time\Enum\TimeTools;
+use Uzulla\MCP\Time\Service\TimeService;
+use Uzulla\MCP\Time\Model\TimeResult;
+use Uzulla\MCP\Time\Service\TimeUtils;
 
 /**
- * TimeResult クラス
- */
-class TimeResult {
-    public string $timezone;
-    public string $datetime;
-    public bool $is_dst;
-
-    public function __construct(string $timezone, string $datetime, bool $is_dst) {
-        $this->timezone = $timezone;
-        $this->datetime = $datetime;
-        $this->is_dst = $is_dst;
-    }
-
-    public function toArray(): array {
-        return [
-            'timezone' => $this->timezone,
-            'datetime' => $this->datetime,
-            'is_dst' => $this->is_dst
-        ];
-    }
-}
-
-/**
- * TimeConversionResult クラス
- */
-class TimeConversionResult {
-    public TimeResult $source;
-    public TimeResult $target;
-    public string $time_difference;
-
-    public function __construct(TimeResult $source, TimeResult $target, string $time_difference) {
-        $this->source = $source;
-        $this->target = $target;
-        $this->time_difference = $time_difference;
-    }
-
-    public function toArray(): array {
-        return [
-            'source' => $this->source->toArray(),
-            'target' => $this->target->toArray(),
-            'time_difference' => $this->time_difference
-        ];
-    }
-}
-
-/**
- * ローカルタイムゾーンを取得
- */
-function get_local_tz(?string $local_tz_override = null): DateTimeZone {
-    if ($local_tz_override) {
-        try {
-            return new DateTimeZone($local_tz_override);
-        } catch (Exception $e) {
-            throw new Exception("無効なタイムゾーンオーバーライド: " . $e->getMessage());
-        }
-    }
-
-    // ローカルタイムゾーンを取得
-    $local_tz = date_default_timezone_get();
-    return new DateTimeZone($local_tz);
-}
-
-/**
- * タイムゾーンオブジェクトを取得
- */
-function get_zoneinfo(string $timezone_name): DateTimeZone {
-    try {
-        return new DateTimeZone($timezone_name);
-    } catch (Exception $e) {
-        throw new Exception("無効なタイムゾーン: " . $e->getMessage());
-    }
-}
-
-/**
- * TimeServer クラス
- */
-class TimeServer {
-    /**
-     * 指定されたタイムゾーンでの現在時刻を取得
-     */
-    public function get_current_time(string $timezone_name): TimeResult {
-        $timezone = get_zoneinfo($timezone_name);
-        $current_time = new DateTime('now', $timezone);
-        
-        return new TimeResult(
-            $timezone_name,
-            $current_time->format(DATE_ATOM),
-            (bool)$current_time->format('I') // 'I'はDSTなら1、そうでなければ0を返す
-        );
-    }
-
-    /**
-     * タイムゾーン間の時刻変換
-     */
-    public function convert_time(string $source_tz, string $time_str, string $target_tz): TimeConversionResult {
-        $source_timezone = get_zoneinfo($source_tz);
-        $target_timezone = get_zoneinfo($target_tz);
-
-        // 時間をパース（HH:MM形式）
-        if (!preg_match('/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/', $time_str)) {
-            throw new Exception("無効な時間形式。HH:MM [24時間形式]が必要です");
-        }
-
-        list($hours, $minutes) = explode(':', $time_str);
-        
-        // 今日の日付でソース時間を作成
-        $now = new DateTime('now', $source_timezone);
-        $source_time = new DateTime(
-            $now->format('Y-m-d') . ' ' . $hours . ':' . $minutes . ':00',
-            $source_timezone
-        );
-
-        // ターゲットタイムゾーンに変換
-        $target_time = clone $source_time;
-        $target_time->setTimezone($target_timezone);
-
-        // 時差を計算
-        $source_offset = $source_time->getOffset();
-        $target_offset = $target_time->getOffset();
-        $hours_difference = ($target_offset - $source_offset) / 3600;
-
-        // 時差文字列をフォーマット
-        if ($hours_difference == (int)$hours_difference) {
-            $time_diff_str = sprintf("%+.1f", $hours_difference) . "h";
-        } else {
-            // 小数時間の場合（ネパールのUTC+5:45など）
-            $time_diff_str = sprintf("%+.2f", $hours_difference);
-            $time_diff_str = rtrim(rtrim($time_diff_str, '0'), '.') . "h";
-        }
-
-        return new TimeConversionResult(
-            new TimeResult(
-                $source_tz,
-                $source_time->format(DATE_ATOM),
-                (bool)$source_time->format('I')
-            ),
-            new TimeResult(
-                $target_tz,
-                $target_time->format(DATE_ATOM),
-                (bool)$target_time->format('I')
-            ),
-            $time_diff_str
-        );
-    }
-}
-
-/**
- * MCP Server クラス
+ * MCP StdioServer クラス
  * python-sdk/src/mcp/server/stdio.pyを参考に実装
  */
-class Server {
+class StdioServer {
     private string $name;
     private array $tools = [];
-    private TimeServer $time_server;
+    private TimeService $time_server;
     private string $local_tz;
 
     public function __construct(string $name, ?string $local_timezone = null) {
         $this->name = $name;
-        $this->time_server = new TimeServer();
-        $this->local_tz = (string)get_local_tz($local_timezone)->getName();
+        $this->time_server = new TimeService();
+        $this->local_tz = (string)TimeUtils::getLocalTz($local_timezone)->getName();
         $this->register_tools();
     }
 
@@ -431,12 +286,4 @@ class Server {
         fflush(STDOUT);
         error_log("Sent response: " . substr($json, 0, 100) . (strlen($json) > 100 ? '...' : ''));
     }
-}
-
-/**
- * メインのserve関数
- */
-function serve(?string $local_timezone = null): void {
-    $server = new Server("mcp-time", $local_timezone);
-    $server->run();
 }

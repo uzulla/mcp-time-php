@@ -1,8 +1,10 @@
-# タイム MCP サーバー - PHP版
+# Time MCP Serer by PHP
 
-PHPで実装されたモデルコンテキストプロトコルサーバーで、時刻とタイムゾーン変換機能を提供します。このサーバーは、LLMがIANAタイムゾーン名を使用して現在の時刻情報を取得し、タイムゾーン変換を実行できるようにし、システムタイムゾーンを自動検出します。
+PHPで実装されたMCP(モデルコンテキストプロトコルサーバー)で、時刻とタイムゾーン変換機能を提供します。
 
-### 利用可能なツール
+このサーバーは、LLMがIANAタイムゾーン名を使用して現在の時刻情報を取得し、タイムゾーン変換を実行できるようにし、システムタイムゾーンを自動検出します。
+
+## 利用可能なツール
 
 - `get_current_time` - 特定のタイムゾーンまたはシステムタイムゾーンでの現在時刻を取得します。
   - 必須引数:
@@ -16,50 +18,27 @@ PHPで実装されたモデルコンテキストプロトコルサーバーで�
 
 ## インストール
 
-### Dockerを使用
-
-このサーバーを使用する最も簡単な方法はDockerを使用することです：
-
 ```bash
-docker build -t mcp/time-php .
-docker run -i --rm mcp/time-php
+# 本レポジトリをclone
+$ git clone https://github.com/uzulla...
+
+# Composerでインストールした場合
+$ cd ...
+$ composer install
 ```
 
-### PHPで直接実行
-
-または、PHPで直接実行することもできます：
-
-```bash
-php src/index.php
-```
-
-## 設定
+## MCP利用側の設定
 
 ### Claude.appの設定
 
-Claude設定に追加：
-
 <details>
-<summary>PHPを使用</summary>
+<summary>PHPを直接実行で使用</summary>
 
 ```json
 "mcpServers": {
   "time": {
     "command": "php",
-    "args": ["src/index.php"]
-  }
-}
-```
-</details>
-
-<details>
-<summary>Dockerを使用</summary>
-
-```json
-"mcpServers": {
-  "time": {
-    "command": "docker",
-    "args": ["run", "-i", "--rm", "mcp/time-php"]
+    "args": ["/path/to/this/repo/bin/time-server"]
   }
 }
 ```
@@ -76,7 +55,7 @@ Zedのsettings.jsonに追加：
 "context_servers": {
   "mcp-server-time": {
     "command": "php",
-    "args": ["src/index.php"]
+    "args": ["/path/to/this/repo/bin/time-server"]
   }
 },
 ```
@@ -90,7 +69,7 @@ Zedのsettings.jsonに追加：
 ```json
 {
   "command": "php",
-  "args": ["src/index.php", "--local-timezone=America/New_York"]
+  "args": ["/path/to/this/repo/bin/time-server", "--local-timezone=America/New_York"]
 }
 ```
 
@@ -147,10 +126,28 @@ Zedのsettings.jsonに追加：
 MCPインスペクターを使用してサーバーをデバッグできます：
 
 ```bash
-npx @modelcontextprotocol/inspector php src/index.php
+npx @modelcontextprotocol/inspector ./bin/time-server
 ```
 
-## テスト
+## 開発
+
+### プロジェクト構造
+
+```
+.
+├── bin/               # 実行可能スクリプト
+│   └── time-server    # エントリーポイント
+├── src/               # ソースコード
+│   ├── Enum/          # 列挙型クラス
+│   ├── Model/         # データモデル
+│   ├── Service/       # サービスクラス
+│   └── StdioServer.php # MCPサーバー実装
+├── tests/             # テストコード
+├── composer.json      # Composer設定
+└── README.md          # このファイル
+```
+
+### テスト
 
 Composerをインストールして依存関係をセットアップします：
 
@@ -171,6 +168,23 @@ composer test
 3. 「ニューヨークで午後4時の時、ロンドンでは何時ですか？」
 4. 「東京時間の午前9時30分をニューヨーク時間に変換して」
 
-## ライセンス
+## License
 
-タイムMCPサーバーのPHP実装はMITライセンスの下でライセンスされています。
+This project is licensed under the MIT License.
+
+MIT License
+
+Copyright (c) 2025 Junichi Ishida aka uzulla (zishida@gmail.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the Software.
+
+Acknowledgments
+
+This project incorporates and translates portions of the following open-source projects:
+- [Model Context Protocol Servers (MIT License)](https://github.com/modelcontextprotocol/servers) 
+- [Model Context Protocol Python SDK (MIT License)](https://github.com/modelcontextprotocol/python-sdk)
+

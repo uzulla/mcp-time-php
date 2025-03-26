@@ -1,17 +1,26 @@
 <?php
+declare(strict_types=1);
+
 /**
  * MCP タイムサーバー PHP テスト - PHPUnit版
  */
 
-require_once __DIR__ . '/../src/server.php';
+namespace Uzulla\MCP\Time\Tests;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
 use PHPUnit\Framework\TestCase;
+use Uzulla\MCP\Time\Service\TimeService;
+use Uzulla\MCP\Time\Enum\TimeTools;
+use Uzulla\MCP\Time\StdioServer;
+use Exception;
 
 class TimeServerTest extends TestCase {
     /**
      * get_current_time関数をテスト
      */
     public function testGetCurrentTime(): void {
-        $time_server = new TimeServer();
+        $time_server = new TimeService();
         
         // 既知のタイムゾーンでテスト
         $result = $time_server->get_current_time('Europe/London');
@@ -30,7 +39,7 @@ class TimeServerTest extends TestCase {
      * get_current_timeで無効なタイムゾーンをテスト
      */
     public function testGetCurrentTimeInvalidTimezone(): void {
-        $time_server = new TimeServer();
+        $time_server = new TimeService();
         
         // 無効なタイムゾーンをテスト
         $this->expectException(Exception::class);
@@ -42,7 +51,7 @@ class TimeServerTest extends TestCase {
      * convert_time関数の基本的な変換をテスト
      */
     public function testConvertTime(): void {
-        $time_server = new TimeServer();
+        $time_server = new TimeService();
         
         // 基本的な変換をテスト
         $result = $time_server->convert_time('Europe/London', '12:00', 'America/New_York');
@@ -64,7 +73,7 @@ class TimeServerTest extends TestCase {
      * 同じ日付での特定のタイムゾーン間の時差を検証
      */
     public function testSpecificTimezoneConversion(): void {
-        $time_server = new TimeServer();
+        $time_server = new TimeService();
         
         // 東京とロサンゼルスの変換をテスト
         $result = $time_server->convert_time('Asia/Tokyo', '12:00', 'America/Los_Angeles');
@@ -79,7 +88,7 @@ class TimeServerTest extends TestCase {
      * 無効な時間形式をテスト
      */
     public function testInvalidTimeFormat(): void {
-        $time_server = new TimeServer();
+        $time_server = new TimeService();
         
         $this->expectException(Exception::class);
         $this->expectExceptionMessageMatches('/無効な時間形式/');
@@ -90,7 +99,7 @@ class TimeServerTest extends TestCase {
      * 無効なソースタイムゾーンをテスト
      */
     public function testInvalidSourceTimezone(): void {
-        $time_server = new TimeServer();
+        $time_server = new TimeService();
         
         $this->expectException(Exception::class);
         $this->expectExceptionMessageMatches('/無効なタイムゾーン/');
@@ -101,7 +110,7 @@ class TimeServerTest extends TestCase {
      * 無効なターゲットタイムゾーンをテスト
      */
     public function testInvalidTargetTimezone(): void {
-        $time_server = new TimeServer();
+        $time_server = new TimeService();
         
         $this->expectException(Exception::class);
         $this->expectExceptionMessageMatches('/無効なタイムゾーン/');
@@ -119,7 +128,7 @@ class ServerTest extends TestCase {
      * テスト前の準備
      */
     protected function setUp(): void {
-        $this->server = new Server('test-server', 'UTC');
+        $this->server = new StdioServer('test-server', 'UTC');
     }
     
     /**
@@ -240,7 +249,7 @@ class ServerTest extends TestCase {
      */
     public function testProcessMessage(): void {
         // process_messageメソッドにアクセスするためのモックサーバー
-        $server = $this->getMockBuilder(Server::class)
+        $server = $this->getMockBuilder(StdioServer::class)
             ->setConstructorArgs(['test-server', 'UTC'])
             ->onlyMethods(['send_response', 'send_error_response'])
             ->getMock();
@@ -254,7 +263,7 @@ class ServerTest extends TestCase {
             );
         
         // リフレクションを使用してprivateメソッドにアクセス
-        $reflectionClass = new ReflectionClass(Server::class);
+        $reflectionClass = new \ReflectionClass(StdioServer::class);
         $method = $reflectionClass->getMethod('process_message');
         $method->setAccessible(true);
         
@@ -274,7 +283,7 @@ class ServerTest extends TestCase {
      */
     public function testProcessMessageError(): void {
         // process_messageメソッドにアクセスするためのモックサーバー
-        $server = $this->getMockBuilder(Server::class)
+        $server = $this->getMockBuilder(StdioServer::class)
             ->setConstructorArgs(['test-server', 'UTC'])
             ->onlyMethods(['send_response', 'send_error_response'])
             ->getMock();
@@ -289,7 +298,7 @@ class ServerTest extends TestCase {
             );
         
         // リフレクションを使用してprivateメソッドにアクセス
-        $reflectionClass = new ReflectionClass(Server::class);
+        $reflectionClass = new \ReflectionClass(StdioServer::class);
         $method = $reflectionClass->getMethod('process_message');
         $method->setAccessible(true);
         

@@ -9,10 +9,13 @@
     },
     "autoload": {
         "psr-4": {
-            "MCP\\Time\\": "src/"
+            "Uzulla\\MCP\\Time\\": "src/"
         }
     },
     "scripts": {
         "test": "phpunit tests"
-    }
+    },
+    "bin": [
+        "bin/time-server"
+    ]
 }
