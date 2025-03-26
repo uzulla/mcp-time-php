@@ -152,10 +152,16 @@ npx @modelcontextprotocol/inspector php src/index.php
 
 ## テスト
 
-付属のテストスクリプトを実行します：
+Composerをインストールして依存関係をセットアップします：
 
 ```bash
-php test/time_server_test.php
+composer install
+```
+
+PHPUnitテストを実行します：
+
+```bash
+composer test
 ```
 
 ## Claudeへの質問例
