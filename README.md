@@ -1,8 +1,10 @@
-# Time MCP Serer by PHP
+# Time MCP Server by PHP
 
 PHPで実装されたMCP(モデルコンテキストプロトコルサーバー)で、時刻とタイムゾーン変換機能を提供します。
 
 このサーバーは、LLMがIANAタイムゾーン名を使用して現在の時刻情報を取得し、タイムゾーン変換を実行できるようにし、システムタイムゾーンを自動検出します。
+
+![work with claude desktop](image.png)
 
 ## 利用可能なツール
 
@@ -20,10 +22,10 @@ PHPで実装されたMCP(モデルコンテキストプロトコルサーバー)
 
 ```bash
 # 本レポジトリをclone
-$ git clone https://github.com/uzulla...
+$ git clone https://github.com/uzulla/mcp-time-php.git
 
 # Composerでインストールした場合
-$ cd ...
+$ cd mcp-time-php
 $ composer install
 ```
 
@@ -135,16 +137,25 @@ npx @modelcontextprotocol/inspector ./bin/time-server
 
 ```
 .
-├── bin/               # 実行可能スクリプト
-│   └── time-server    # エントリーポイント
-├── src/               # ソースコード
-│   ├── Enum/          # 列挙型クラス
-│   ├── Model/         # データモデル
-│   ├── Service/       # サービスクラス
-│   └── StdioServer.php # MCPサーバー実装
-├── tests/             # テストコード
-├── composer.json      # Composer設定
-└── README.md          # このファイル
+├── bin/                   # 実行可能スクリプト
+│   └── time-server        # エントリーポイント
+├── src/                   # ソースコード
+│   ├── Enum/              # 列挙型クラス
+│   │   └── TimeTools.php  # 時間関連ツール列挙型
+│   ├── Model/             # データモデル
+│   │   ├── TimeConversionResult.php  # 時間変換結果モデル
+│   │   └── TimeResult.php  # 時間取得結果モデル
+│   ├── Service/           # サービスクラス
+│   │   ├── TimeService.php  # 時間サービス
+│   │   └── TimeUtils.php  # 時間ユーティリティ
+│   └── StdioServer.php    # MCPサーバー実装
+├── tests/                 # テストコード
+│   ├── ServerTest.php     # サーバーテスト
+│   └── TimeServerTest.php # 時間サーバーテスト
+├── composer.json          # Composer設定
+├── composer.lock          # Composerロックファイル
+├── phpunit.xml            # PHPUnit設定
+└── README.md              # このファイル
 ```
 
 ### テスト
