@@ -1,6 +1,6 @@
 {
-    "name": "mcp/time-php",
-    "description": "MCP Time Server in PHP",
+    "name": "uzulla/mcp-time-php",
+    "description": "MCP Time Server wrote in PHP",
     "require": {
         "php": ">=7.4"
     },
