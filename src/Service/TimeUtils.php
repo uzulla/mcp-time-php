@@ -1,25 +1,21 @@
 <?php
 declare(strict_types=1);
 
-/**
- * MCP タイムサーバー - PHP版
- * MCPに時刻とタイムゾーン変換機能を提供します
- */
-
 namespace Uzulla\MCP\Time\Service;
 
-use DateTime;
+use DateInvalidTimeZoneException;
 use DateTimeZone;
 use Exception;
 
-/**
- * TimeUtils ユーティリティクラス
- */
-class TimeUtils {
+class TimeUtils
+{
     /**
      * ローカルタイムゾーンを取得
+     * @throws DateInvalidTimeZoneException
+     * @throws Exception
      */
-    public static function getLocalTz(?string $local_tz_override = null): DateTimeZone {
+    public static function getLocalTz(?string $local_tz_override = null): DateTimeZone
+    {
         if ($local_tz_override) {
             try {
                 return new DateTimeZone($local_tz_override);
@@ -35,8 +31,10 @@ class TimeUtils {
 
     /**
      * タイムゾーンオブジェクトを取得
+     * @throws Exception
      */
-    public static function getZoneinfo(string $timezone_name): DateTimeZone {
+    public static function getZoneinfo(string $timezone_name): DateTimeZone
+    {
         try {
             return new DateTimeZone($timezone_name);
         } catch (Exception $e) {

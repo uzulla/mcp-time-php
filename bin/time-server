@@ -2,33 +2,14 @@
 <?php
 declare(strict_types=1);
 
-/**
- * MCP タイムサーバー - PHP版
- * MCP タイムサーバーのエントリーポイント
- */
-
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Uzulla\MCP\Time\StdioServer;
 
-/**
- * メイン関数
- */
-function main() {
-    // コマンドライン引数を解析
-    $options = getopt('', ['local-timezone::']);
-    $local_timezone = $options['local-timezone'] ?? null;
-    
-    serve($local_timezone);
-}
+// コマンドライン引数を解析
+$options = getopt('', ['local-timezone::']);
+$local_timezone = $options['local-timezone'] ?? null;
 
-/**
- * メインのserve関数
- */
-function serve(?string $local_timezone = null): void {
-    $server = new StdioServer("mcp-time", $local_timezone);
-    $server->run();
-}
-
-// サーバーを実行
-main();
+// サーバーを起動
+$server = new StdioServer("mcp-time-php", $local_timezone);
+$server->run();

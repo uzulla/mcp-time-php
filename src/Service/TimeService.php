@@ -1,30 +1,24 @@
 <?php
 declare(strict_types=1);
 
-/**
- * MCP タイムサーバー - PHP版
- * MCPに時刻とタイムゾーン変換機能を提供します
- */
-
 namespace Uzulla\MCP\Time\Service;
 
 use DateTime;
-use DateTimeZone;
 use Exception;
-use Uzulla\MCP\Time\Model\TimeResult;
 use Uzulla\MCP\Time\Model\TimeConversionResult;
+use Uzulla\MCP\Time\Model\TimeResult;
 
-/**
- * TimeServer クラス
- */
-class TimeService {
+class TimeService
+{
     /**
      * 指定されたタイムゾーンでの現在時刻を取得
+     * @throws Exception
      */
-    public function get_current_time(string $timezone_name): TimeResult {
+    public function get_current_time(string $timezone_name): TimeResult
+    {
         $timezone = TimeUtils::getZoneinfo($timezone_name);
         $current_time = new DateTime('now', $timezone);
-        
+
         return new TimeResult(
             $timezone_name,
             $current_time->format(DATE_ATOM),
@@ -34,8 +28,10 @@ class TimeService {
 
     /**
      * タイムゾーン間の時刻変換
+     * @throws Exception
      */
-    public function convert_time(string $source_tz, string $time_str, string $target_tz): TimeConversionResult {
+    public function convert_time(string $source_tz, string $time_str, string $target_tz): TimeConversionResult
+    {
         $source_timezone = TimeUtils::getZoneinfo($source_tz);
         $target_timezone = TimeUtils::getZoneinfo($target_tz);
 
@@ -45,7 +41,7 @@ class TimeService {
         }
 
         list($hours, $minutes) = explode(':', $time_str);
-        
+
         // 今日の日付でソース時間を作成
         $now = new DateTime('now', $source_timezone);
         $source_time = new DateTime(

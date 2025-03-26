@@ -9,7 +9,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Uzulla\\MCP\\Time\\": "src/"
+            "Uzulla\\MCP\\Time\\": "src/",
+            "Uzulla\\MCP\\Time\\Tests\\": "tests/"
         }
     },
     "scripts": {
