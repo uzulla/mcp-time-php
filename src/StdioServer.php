@@ -115,7 +115,7 @@ class StdioServer {
             return [
                 [
                     'type' => 'text',
-                    'text' => json_encode($result instanceof TimeResult ? $result->toArray() : $result->toArray(), JSON_PRETTY_PRINT)
+                    'text' => json_encode($result !== null ? $result->toArray() : null, JSON_PRETTY_PRINT)
                 ]
             ];
         } catch (Exception $e) {
@@ -253,7 +253,7 @@ class StdioServer {
                 'code' => $code,
                 'message' => $message
             ],
-            'id' => $id
+            'id' => $id ?? ""
         ];
         
         $this->write_message($response);
@@ -266,7 +266,7 @@ class StdioServer {
         $response = [
             'jsonrpc' => '2.0',
             'result' => $result,
-            'id' => $id
+            'id' => $id ?? ""
         ];
         
         $this->write_message($response);
