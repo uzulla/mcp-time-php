@@ -128,6 +128,7 @@ class ServerTest extends TestCase {
      * テスト前の準備
      */
     protected function setUp(): void {
+        parent::setUp();
         $this->server = new StdioServer('test-server', 'UTC');
     }
     
